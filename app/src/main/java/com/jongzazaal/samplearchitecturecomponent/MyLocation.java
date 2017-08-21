@@ -43,6 +43,48 @@ public class MyLocation implements LifecycleObserver, LocationListener {
         lifecycle.addObserver(this);
     }
 
+    @SuppressLint("MissingPermission")
+    @OnLifecycleEvent(ON_START)
+    public void start() {
+        if (enabled) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 10f, this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 100, 10f, this);
+        }
+        else {
+            requestPermission();
+        }
+    }
+
+    @OnLifecycleEvent(ON_STOP)
+    public void stop() {locationManager.removeUpdates(this);}
+    @OnLifecycleEvent(ON_DESTROY)
+    public void cleanup() {
+        lifecycle.removeObserver(this);
+    }
+
+    private void requestPermission(){
+        Dexter.withActivity(myActivity)
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(new PermissionListener() {
+                    @Override public void onPermissionGranted(PermissionGrantedResponse response) {
+                        Toast.makeText(myActivity, "onPermissionGranted", Toast.LENGTH_SHORT).show();
+                        enabled = true;
+                        start();
+                    }
+                    @Override public void onPermissionDenied(PermissionDeniedResponse response) {
+                        Toast.makeText(myActivity, "onPermissionDenied", Toast.LENGTH_SHORT).show();
+                    }
+                    @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                        Toast.makeText(myActivity, "onPermissionRationaleShouldBeShown", Toast.LENGTH_SHORT).show();
+                        token.continuePermissionRequest();
+
+                    }
+                }).check();
+    }
+
+    public interface MyListener {
+        void LocationChange(Location location);
+    }
 
     @Override
     public void onLocationChanged(Location location) {
@@ -64,44 +106,5 @@ public class MyLocation implements LifecycleObserver, LocationListener {
 
     }
 
-    public interface MyListener {
-        void LocationChange(Location location);
-    }
-
-    @SuppressLint("MissingPermission")
-    @OnLifecycleEvent(ON_START)
-    public void start() {
-        if (enabled) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 10f, this);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 100, 10f, this);
-        }
-        else {
-            Dexter.withActivity(myActivity)
-                    .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                    .withListener(new PermissionListener() {
-                        @Override public void onPermissionGranted(PermissionGrantedResponse response) {
-                            Toast.makeText(myActivity, "onPermissionGranted", Toast.LENGTH_SHORT).show();
-                            enabled = true;
-                            start();
-                        }
-                        @Override public void onPermissionDenied(PermissionDeniedResponse response) {
-                            Toast.makeText(myActivity, "onPermissionDenied", Toast.LENGTH_SHORT).show();
-                        }
-                        @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-                            Toast.makeText(myActivity, "onPermissionRationaleShouldBeShown", Toast.LENGTH_SHORT).show();
-                            token.continuePermissionRequest();
-
-                        }
-                    }).check();
-
-
-        }
-    }
-    @OnLifecycleEvent(ON_STOP)
-    public void stop() {}
-    @OnLifecycleEvent(ON_DESTROY)
-    public void cleanup() {
-        lifecycle.removeObserver(this);
-    }
 }
 
