@@ -65,7 +65,7 @@ public class MyLocation implements LifecycleObserver, LocationListener {
     }
 
     public interface MyListener {
-        public void LocationChange(Location location);
+        void LocationChange(Location location);
     }
 
     @SuppressLint("MissingPermission")
@@ -89,8 +89,12 @@ public class MyLocation implements LifecycleObserver, LocationListener {
                         }
                         @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
                             Toast.makeText(myActivity, "onPermissionRationaleShouldBeShown", Toast.LENGTH_SHORT).show();
+                            token.continuePermissionRequest();
+
                         }
                     }).check();
+
+
         }
     }
     @OnLifecycleEvent(ON_STOP)
