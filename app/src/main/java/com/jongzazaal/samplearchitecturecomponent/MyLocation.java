@@ -11,6 +11,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.karumi.dexter.Dexter;
@@ -20,6 +21,7 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import static android.arch.lifecycle.Lifecycle.Event.ON_CREATE;
 import static android.arch.lifecycle.Lifecycle.Event.ON_DESTROY;
 import static android.arch.lifecycle.Lifecycle.Event.ON_START;
 import static android.arch.lifecycle.Lifecycle.Event.ON_STOP;
@@ -56,11 +58,19 @@ public class MyLocation implements LifecycleObserver, LocationListener {
     }
 
     @OnLifecycleEvent(ON_STOP)
-    public void stop() {locationManager.removeUpdates(this);}
+    public void stop() {
+        locationManager.removeUpdates(this);
+    }
     @OnLifecycleEvent(ON_DESTROY)
     public void cleanup() {
         lifecycle.removeObserver(this);
     }
+
+    @OnLifecycleEvent(ON_CREATE)
+    public void create() {
+        Log.d("TAG", "create: ");
+    }
+
 
     private void requestPermission(){
         Dexter.withActivity(myActivity)
